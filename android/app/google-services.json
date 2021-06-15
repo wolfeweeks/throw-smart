@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "878388965167",
+    "project_id": "throw-smart",
+    "storage_bucket": "throw-smart.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878388965167:android:0db079a39ee522e23d3bda",
+        "android_client_info": {
+          "package_name": "com.wolfeweeks.throwsmart"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "878388965167-utnt8hhovkvhuulv7o60qigbhojo7n1m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wolfeweeks.throwsmart",
+            "certificate_hash": "bc8ed011dd15f73182e73ba16b4457b54b55e53d"
+          }
+        },
+        {
+          "client_id": "878388965167-ruqnrf31h8fet51i4ad3em51v2q6eb1b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVH_zog3ethEYfRFXHwr1pUn1ud20onFg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "878388965167-ruqnrf31h8fet51i4ad3em51v2q6eb1b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -14,8 +14,11 @@ class AppRouter {
           builder: (_) => SplashScreen(),
         );
       case '/signIn':
-        return MaterialPageRoute(
-          builder: (_) => SignInScreen(),
+        return PageRouteBuilder(
+          transitionDuration: Duration(seconds: 1),
+          pageBuilder: (_, __, ___) {
+            return SignInScreen();
+          },
         );
       case '/newUser':
         return MaterialPageRoute(

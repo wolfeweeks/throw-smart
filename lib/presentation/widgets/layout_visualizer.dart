@@ -7,15 +7,15 @@ class LayoutVisualizer extends StatelessWidget {
 
   LayoutVisualizer({
     required this.child,
-    this.backgroundColor = Colors.red,
-    this.borderColor = Colors.black,
+    this.backgroundColor = Colors.transparent,
+    this.borderColor = Colors.red,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: backgroundColor,
       decoration: BoxDecoration(
+        color: backgroundColor,
         border: Border.all(
           width: 2,
           color: borderColor,

@@ -1,7 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:throw_smart/presentation/widgets/background_container.dart';
+import 'package:throw_smart/presentation/widgets/layout_visualizer.dart';
+import 'package:throw_smart/presentation/widgets/logo.dart';
 import '../../constants/enums.dart';
 import '../../data/auth_repository.dart';
 import '../../data/db_repository.dart';
@@ -50,6 +54,8 @@ class NewUserScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
+    SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+
     bool canSubmit = watch(_userTypeProvider).state == UserType.coach
         ? watch(_coachCanSubmitProvider)
         : watch(_playerCanSubmitProvider);
@@ -74,404 +80,463 @@ class NewUserScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      body: Center(
-        child: Container(
-          width: width,
-          height: height,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                //first name text field
-                TSTextField(
-                  padding: EdgeInsets.all(16),
-                  height: 40,
-                  width: width - 32,
-                  hintText: 'First Name:',
-                  textCapitalization: TextCapitalization.words,
-                  autocorrect: false,
-                  onChanged: (value) {
-                    context.read(_firstNameProvider).state = value;
-                  },
-                  onEditingComplete: () => FocusScope.of(context).nextFocus(),
-                  keyboardType: TextInputType.name,
-                ),
-
-                //last name text field
-                TSTextField(
-                  padding: EdgeInsets.all(16),
-                  height: 40,
-                  width: width - 32,
-                  hintText: 'Last Name:',
-                  autocorrect: false,
-                  textCapitalization: TextCapitalization.words,
-                  onChanged: (value) {
-                    context.read(_lastNameProvider).state = value;
-                  },
-                ),
-
-                SizedBox(height: 16),
-
-                //select userType
-                Text('Register as:'),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    PickOne<UserType>(
-                      groupValue: watch(_userTypeProvider).state,
-                      value: UserType.player,
-                      onChanged: (value) {
-                        context.read(_userTypeProvider).state = value;
-                      },
-                      text: 'Player',
-                    ),
-                    SizedBox(width: 16),
-                    PickOne<UserType>(
-                      groupValue: watch(_userTypeProvider).state,
-                      value: UserType.coach,
-                      onChanged: (value) {
-                        context.read(_userTypeProvider).state = value;
-                      },
-                      text: 'Coach',
-                    ),
-                  ],
-                ),
-
-                //if coach, show join or create buttons and team name/access code
-                //text field
-                Hideable(
-                  shouldShowWhen:
-                      watch(_userTypeProvider).state == UserType.coach,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      PickOne<int>(
-                        groupValue: watch(_createOrJoinProvider).state,
-                        value: 0,
-                        onChanged: (value) {
-                          context.read(_createOrJoinProvider).state = value;
-                          context.read(_teamAccessCodeProvider).state = '';
-                        },
-                        text: 'Create Team',
-                      ),
-                      SizedBox(width: 16),
-                      PickOne<int>(
-                        groupValue: watch(_createOrJoinProvider).state,
-                        value: 1,
-                        onChanged: (value) {
-                          context.read(_createOrJoinProvider).state = value;
-                          context.read(_teamNameProvider).state = '';
-                        },
-                        text: 'Join Team',
-                      ),
-                    ],
+      body: BackgroundContainer(
+        child: Center(
+          child: SingleChildScrollView(
+            physics: ClampingScrollPhysics(),
+            child: SizedBox(
+              height: height,
+              child: Column(
+                children: [
+                  Flexible(
+                    fit: FlexFit.tight,
+                    flex: 1,
+                    child: Center(child: Logo()),
                   ),
-                ),
+                  Flexible(
+                    fit: FlexFit.tight,
+                    flex: 2,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        //first name text field
+                        TSTextField(
+                          padding: EdgeInsets.all(16),
+                          width: width - 32,
+                          hintText: 'First Name:',
+                          textCapitalization: TextCapitalization.words,
+                          autocorrect: false,
+                          onChanged: (value) {
+                            context.read(_firstNameProvider).state = value;
+                          },
+                          onEditingComplete: () =>
+                              FocusScope.of(context).nextFocus(),
+                          keyboardType: TextInputType.name,
+                        ),
 
-                //join or create team text field
-                Hideable(
-                  shouldShowWhen:
-                      watch(_userTypeProvider).state == UserType.coach,
-                  child: TSTextField(
-                    padding: EdgeInsets.all(16),
-                    height: 40,
-                    width: width - 32,
-                    hintText: watch(_createOrJoinProvider).state == 0
-                        ? 'Team Name:'
-                        : 'Team Access Code:',
-                    autocorrect: false,
-                    textCapitalization: TextCapitalization.words,
-                    onChanged: (value) {
-                      watch(_createOrJoinProvider).state == 0
-                          ? context.read(_teamNameProvider).state = value
-                          : context.read(_teamAccessCodeProvider).state = value;
-                    },
-                  ),
-                ),
+                        //last name text field
+                        TSTextField(
+                          padding: EdgeInsets.all(16),
+                          width: width - 32,
+                          hintText: 'Last Name:',
+                          autocorrect: false,
+                          textCapitalization: TextCapitalization.words,
+                          onChanged: (value) {
+                            context.read(_lastNameProvider).state = value;
+                          },
+                        ),
 
-                //arsenal selector
-                Hideable(
-                  shouldShowWhen:
-                      watch(_userTypeProvider).state == UserType.player,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text('Select your pitches:'),
-                      SizedBox(
-                        height: height * 1 / 3,
-                        width: width * 2 / 3,
-                        child: ListView(
-                          padding: EdgeInsets.all(0),
+                        SizedBox(height: 16),
+
+                        //select userType
+                        Text('Register as:'),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            //fourseam
-                            PickMany<PitchType>(
-                              value: watch(_testArsenalProvider).state[0],
+                            PickOne<UserType>(
+                              groupValue: watch(_userTypeProvider).state,
+                              value: UserType.player,
                               onChanged: (value) {
-                                context.read(_testArsenalProvider).state[0] =
-                                    value!;
-
-                                if (value) {
-                                  arsenal.state.add(PitchType.fourSeam);
-                                } else {
-                                  arsenal.state.remove(PitchType.fourSeam);
-                                }
-
-                                testArsenal.state = testArsenal.state;
-                                arsenal.state = arsenal.state;
+                                context.read(_userTypeProvider).state = value;
                               },
-                              width: 150,
-                              text: 'Four-Seam',
+                              text: 'Player',
                             ),
-
-                            //twoseam
-                            PickMany<PitchType>(
-                              value: watch(_testArsenalProvider).state[1],
+                            SizedBox(width: 16),
+                            PickOne<UserType>(
+                              groupValue: watch(_userTypeProvider).state,
+                              value: UserType.coach,
                               onChanged: (value) {
-                                context.read(_testArsenalProvider).state[1] =
-                                    value!;
-
-                                if (value) {
-                                  arsenal.state.add(PitchType.twoSeam);
-                                } else {
-                                  arsenal.state.remove(PitchType.twoSeam);
-                                }
-
-                                testArsenal.state = testArsenal.state;
-                                arsenal.state = arsenal.state;
+                                context.read(_userTypeProvider).state = value;
                               },
-                              width: 150,
-                              text: 'Two-Seam',
-                            ),
-
-                            //cutter
-                            PickMany<PitchType>(
-                              value: watch(_testArsenalProvider).state[2],
-                              onChanged: (value) {
-                                context.read(_testArsenalProvider).state[2] =
-                                    value!;
-
-                                if (value) {
-                                  arsenal.state.add(PitchType.cutter);
-                                } else {
-                                  arsenal.state.remove(PitchType.cutter);
-                                }
-
-                                testArsenal.state = testArsenal.state;
-                                arsenal.state = arsenal.state;
-                              },
-                              width: 150,
-                              text: 'Cutter',
-                            ),
-
-                            //curve
-                            PickMany<PitchType>(
-                              value: watch(_testArsenalProvider).state[3],
-                              onChanged: (value) {
-                                context.read(_testArsenalProvider).state[3] =
-                                    value!;
-
-                                if (value) {
-                                  arsenal.state.add(PitchType.curve);
-                                } else {
-                                  arsenal.state.remove(PitchType.curve);
-                                }
-
-                                testArsenal.state = testArsenal.state;
-                                arsenal.state = arsenal.state;
-                              },
-                              width: 150,
-                              text: 'Curveball',
-                            ),
-
-                            //slider
-                            PickMany<PitchType>(
-                              value: watch(_testArsenalProvider).state[4],
-                              onChanged: (value) {
-                                context.read(_testArsenalProvider).state[4] =
-                                    value!;
-
-                                if (value) {
-                                  arsenal.state.add(PitchType.slider);
-                                } else {
-                                  arsenal.state.remove(PitchType.slider);
-                                }
-
-                                testArsenal.state = testArsenal.state;
-                                arsenal.state = arsenal.state;
-                              },
-                              width: 150,
-                              text: 'Slider',
-                            ),
-
-                            //change
-                            PickMany<PitchType>(
-                              value: watch(_testArsenalProvider).state[5],
-                              onChanged: (value) {
-                                context.read(_testArsenalProvider).state[5] =
-                                    value!;
-
-                                if (value) {
-                                  arsenal.state.add(PitchType.changeup);
-                                } else {
-                                  arsenal.state.remove(PitchType.changeup);
-                                }
-
-                                testArsenal.state = testArsenal.state;
-                                arsenal.state = arsenal.state;
-                              },
-                              width: 150,
-                              text: 'Changeup',
-                            ),
-
-                            //splitter
-                            PickMany<PitchType>(
-                              value: watch(_testArsenalProvider).state[6],
-                              onChanged: (value) {
-                                context.read(_testArsenalProvider).state[6] =
-                                    value!;
-
-                                if (value) {
-                                  arsenal.state.add(PitchType.splitter);
-                                } else {
-                                  arsenal.state.remove(PitchType.splitter);
-                                }
-
-                                testArsenal.state = testArsenal.state;
-                                arsenal.state = arsenal.state;
-                              },
-                              width: 150,
-                              text: 'Splitter',
-                            ),
-
-                            //knuckle
-                            PickMany<PitchType>(
-                              value: watch(_testArsenalProvider).state[7],
-                              onChanged: (value) {
-                                context.read(_testArsenalProvider).state[7] =
-                                    value!;
-
-                                if (value) {
-                                  arsenal.state.add(PitchType.knuckleball);
-                                } else {
-                                  arsenal.state.remove(PitchType.knuckleball);
-                                }
-
-                                testArsenal.state = testArsenal.state;
-                                arsenal.state = arsenal.state;
-                              },
-                              width: 150,
-                              text: 'Knuckleball',
+                              text: 'Coach',
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
 
-                Hideable(
-                  shouldShowWhen:
-                      watch(_userTypeProvider).state == UserType.player,
-                  child: TSTextField(
-                    padding: EdgeInsets.all(16),
-                    height: 40,
-                    width: width - 32,
-                    hintText: 'Team Access Code:',
-                    autocorrect: false,
-                    textCapitalization: TextCapitalization.none,
-                    onChanged: (value) {
-                      context.read(_teamAccessCodeProvider).state = value;
-                    },
-                  ),
-                ),
+                        //if coach, show join or create buttons and team name/access code
+                        //text field
+                        Hideable(
+                          shouldShowWhen:
+                              watch(_userTypeProvider).state == UserType.coach,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              PickOne<int>(
+                                groupValue: watch(_createOrJoinProvider).state,
+                                value: 0,
+                                onChanged: (value) {
+                                  context.read(_createOrJoinProvider).state =
+                                      value;
+                                  context.read(_teamAccessCodeProvider).state =
+                                      '';
+                                },
+                                text: 'Create Team',
+                              ),
+                              SizedBox(width: 16),
+                              PickOne<int>(
+                                groupValue: watch(_createOrJoinProvider).state,
+                                value: 1,
+                                onChanged: (value) {
+                                  context.read(_createOrJoinProvider).state =
+                                      value;
+                                  context.read(_teamNameProvider).state = '';
+                                },
+                                text: 'Join Team',
+                              ),
+                            ],
+                          ),
+                        ),
 
-                //buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: canSubmit
-                          ? () {
-                              //sort arsenal by enum order
-                              context
-                                  .read(_arsenalProvider)
-                                  .state
-                                  .sort((a, b) => a.index.compareTo(b.index));
-                              context.read(dbProvider).createUser(
-                                    uid: user.uid,
-                                    firstName:
-                                        context.read(_firstNameProvider).state,
-                                    lastName:
-                                        context.read(_lastNameProvider).state,
-                                    userType:
-                                        context.read(_userTypeProvider).state!,
-                                    arsenal:
-                                        context.read(_arsenalProvider).state,
-                                    isCreatingTeam: context
-                                                .read(_createOrJoinProvider)
-                                                .state ==
-                                            0
-                                        ? true
-                                        : false,
-                                    isJoiningTeam: context
-                                            .read(_teamAccessCodeProvider)
-                                            .state
-                                            .isNotEmpty
-                                        ? true
-                                        : false,
-                                    // isJoiningTeam: context
-                                    //             .read(_createOrJoinProvider)
-                                    //             .state ==
-                                    //         1
-                                    //     ? true
-                                    //     : false,
-                                    teamAccessCode: context
-                                        .read(_teamAccessCodeProvider)
-                                        .state,
-                                    teamName:
-                                        context.read(_teamNameProvider).state,
-                                  );
-                              var tempUserType =
-                                  context.read(_userTypeProvider).state;
+                        //join or create team text field
+                        Hideable(
+                          shouldShowWhen:
+                              watch(_userTypeProvider).state == UserType.coach,
+                          child: TSTextField(
+                            padding: EdgeInsets.all(16),
+                            width: width - 32,
+                            hintText: watch(_createOrJoinProvider).state == 0
+                                ? 'Team Name:'
+                                : 'Team Access Code:',
+                            autocorrect: false,
+                            textCapitalization: TextCapitalization.words,
+                            onChanged: (value) {
+                              watch(_createOrJoinProvider).state == 0
+                                  ? context.read(_teamNameProvider).state =
+                                      value
+                                  : context
+                                      .read(_teamAccessCodeProvider)
+                                      .state = value;
+                            },
+                          ),
+                        ),
 
-                              resetFields();
+                        Hideable(
+                          shouldShowWhen:
+                              watch(_userTypeProvider).state == UserType.player,
+                          child: TSTextField(
+                            padding: EdgeInsets.all(16),
+                            width: width - 32,
+                            hintText: 'Team Access Code:',
+                            autocorrect: false,
+                            textCapitalization: TextCapitalization.none,
+                            onChanged: (value) {
+                              context.read(_teamAccessCodeProvider).state =
+                                  value;
+                            },
+                          ),
+                        ),
 
-                              tempUserType == UserType.coach
-                                  ? Navigator.of(context).pushReplacementNamed(
-                                      '/coachHome',
-                                      arguments: user.uid)
-                                  : Navigator.of(context).pushReplacementNamed(
-                                      '/playerHome',
-                                      arguments: user.uid);
-                            }
-                          : null,
-                      child: Text('Submit'),
-                      style: ElevatedButton.styleFrom(
-                        primary: canSubmit ? Colors.greenAccent : Colors.grey,
-                      ),
+                        //arsenal selector
+                        Hideable(
+                          shouldShowWhen:
+                              watch(_userTypeProvider).state == UserType.player,
+                          child: Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text('Select your pitches:'),
+                                Expanded(
+                                  child: ListView(
+                                    padding: EdgeInsets.all(0),
+                                    children: [
+                                      //fourseam
+                                      PickMany<PitchType>(
+                                        value: watch(_testArsenalProvider)
+                                            .state[0],
+                                        onChanged: (value) {
+                                          context
+                                              .read(_testArsenalProvider)
+                                              .state[0] = value!;
+
+                                          if (value) {
+                                            arsenal.state
+                                                .add(PitchType.fourSeam);
+                                          } else {
+                                            arsenal.state
+                                                .remove(PitchType.fourSeam);
+                                          }
+
+                                          testArsenal.state = testArsenal.state;
+                                          arsenal.state = arsenal.state;
+                                        },
+                                        width: 150,
+                                        text: 'Four-Seam',
+                                      ),
+
+                                      //twoseam
+                                      PickMany<PitchType>(
+                                        value: watch(_testArsenalProvider)
+                                            .state[1],
+                                        onChanged: (value) {
+                                          context
+                                              .read(_testArsenalProvider)
+                                              .state[1] = value!;
+
+                                          if (value) {
+                                            arsenal.state
+                                                .add(PitchType.twoSeam);
+                                          } else {
+                                            arsenal.state
+                                                .remove(PitchType.twoSeam);
+                                          }
+
+                                          testArsenal.state = testArsenal.state;
+                                          arsenal.state = arsenal.state;
+                                        },
+                                        width: 150,
+                                        text: 'Two-Seam',
+                                      ),
+
+                                      //cutter
+                                      PickMany<PitchType>(
+                                        value: watch(_testArsenalProvider)
+                                            .state[2],
+                                        onChanged: (value) {
+                                          context
+                                              .read(_testArsenalProvider)
+                                              .state[2] = value!;
+
+                                          if (value) {
+                                            arsenal.state.add(PitchType.cutter);
+                                          } else {
+                                            arsenal.state
+                                                .remove(PitchType.cutter);
+                                          }
+
+                                          testArsenal.state = testArsenal.state;
+                                          arsenal.state = arsenal.state;
+                                        },
+                                        width: 150,
+                                        text: 'Cutter',
+                                      ),
+
+                                      //curve
+                                      PickMany<PitchType>(
+                                        value: watch(_testArsenalProvider)
+                                            .state[3],
+                                        onChanged: (value) {
+                                          context
+                                              .read(_testArsenalProvider)
+                                              .state[3] = value!;
+
+                                          if (value) {
+                                            arsenal.state.add(PitchType.curve);
+                                          } else {
+                                            arsenal.state
+                                                .remove(PitchType.curve);
+                                          }
+
+                                          testArsenal.state = testArsenal.state;
+                                          arsenal.state = arsenal.state;
+                                        },
+                                        width: 150,
+                                        text: 'Curveball',
+                                      ),
+
+                                      //slider
+                                      PickMany<PitchType>(
+                                        value: watch(_testArsenalProvider)
+                                            .state[4],
+                                        onChanged: (value) {
+                                          context
+                                              .read(_testArsenalProvider)
+                                              .state[4] = value!;
+
+                                          if (value) {
+                                            arsenal.state.add(PitchType.slider);
+                                          } else {
+                                            arsenal.state
+                                                .remove(PitchType.slider);
+                                          }
+
+                                          testArsenal.state = testArsenal.state;
+                                          arsenal.state = arsenal.state;
+                                        },
+                                        width: 150,
+                                        text: 'Slider',
+                                      ),
+
+                                      //change
+                                      PickMany<PitchType>(
+                                        value: watch(_testArsenalProvider)
+                                            .state[5],
+                                        onChanged: (value) {
+                                          context
+                                              .read(_testArsenalProvider)
+                                              .state[5] = value!;
+
+                                          if (value) {
+                                            arsenal.state
+                                                .add(PitchType.changeup);
+                                          } else {
+                                            arsenal.state
+                                                .remove(PitchType.changeup);
+                                          }
+
+                                          testArsenal.state = testArsenal.state;
+                                          arsenal.state = arsenal.state;
+                                        },
+                                        width: 150,
+                                        text: 'Changeup',
+                                      ),
+
+                                      //splitter
+                                      PickMany<PitchType>(
+                                        value: watch(_testArsenalProvider)
+                                            .state[6],
+                                        onChanged: (value) {
+                                          context
+                                              .read(_testArsenalProvider)
+                                              .state[6] = value!;
+
+                                          if (value) {
+                                            arsenal.state
+                                                .add(PitchType.splitter);
+                                          } else {
+                                            arsenal.state
+                                                .remove(PitchType.splitter);
+                                          }
+
+                                          testArsenal.state = testArsenal.state;
+                                          arsenal.state = arsenal.state;
+                                        },
+                                        width: 150,
+                                        text: 'Splitter',
+                                      ),
+
+                                      //knuckle
+                                      PickMany<PitchType>(
+                                        value: watch(_testArsenalProvider)
+                                            .state[7],
+                                        onChanged: (value) {
+                                          context
+                                              .read(_testArsenalProvider)
+                                              .state[7] = value!;
+
+                                          if (value) {
+                                            arsenal.state
+                                                .add(PitchType.knuckleball);
+                                          } else {
+                                            arsenal.state
+                                                .remove(PitchType.knuckleball);
+                                          }
+
+                                          testArsenal.state = testArsenal.state;
+                                          arsenal.state = arsenal.state;
+                                        },
+                                        width: 150,
+                                        text: 'Knuckleball',
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        //buttons
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: canSubmit
+                                  ? () {
+                                      //sort arsenal by enum order
+                                      context.read(_arsenalProvider).state.sort(
+                                          (a, b) => a.index.compareTo(b.index));
+                                      context.read(dbProvider).createUser(
+                                            uid: user.uid,
+                                            firstName: context
+                                                .read(_firstNameProvider)
+                                                .state,
+                                            lastName: context
+                                                .read(_lastNameProvider)
+                                                .state,
+                                            userType: context
+                                                .read(_userTypeProvider)
+                                                .state!,
+                                            arsenal: context
+                                                .read(_arsenalProvider)
+                                                .state,
+                                            isCreatingTeam: context
+                                                        .read(
+                                                            _createOrJoinProvider)
+                                                        .state ==
+                                                    0
+                                                ? true
+                                                : false,
+                                            isJoiningTeam: context
+                                                    .read(
+                                                        _teamAccessCodeProvider)
+                                                    .state
+                                                    .isNotEmpty
+                                                ? true
+                                                : false,
+                                            // isJoiningTeam: context
+                                            //             .read(_createOrJoinProvider)
+                                            //             .state ==
+                                            //         1
+                                            //     ? true
+                                            //     : false,
+                                            teamAccessCode: context
+                                                .read(_teamAccessCodeProvider)
+                                                .state,
+                                            teamName: context
+                                                .read(_teamNameProvider)
+                                                .state,
+                                          );
+                                      var tempUserType =
+                                          context.read(_userTypeProvider).state;
+
+                                      resetFields();
+
+                                      tempUserType == UserType.coach
+                                          ? Navigator.of(context)
+                                              .pushReplacementNamed(
+                                                  '/coachHome',
+                                                  arguments: user.uid)
+                                          : Navigator.of(context)
+                                              .pushReplacementNamed(
+                                                  '/playerHome',
+                                                  arguments: user.uid);
+                                    }
+                                  : null,
+                              child: Text('Submit'),
+                              style: ElevatedButton.styleFrom(
+                                primary: canSubmit
+                                    ? Colors.greenAccent
+                                    : Colors.grey,
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.red,
+                              ),
+                              onPressed: () async {
+                                try {
+                                  await context
+                                      .read(authProvider)
+                                      .deleteAccount();
+                                } on FirebaseAuthException catch (e) {
+                                  print(e.toString());
+                                }
+                                await context.read(authProvider).signOut();
+                                resetFields();
+                                Navigator.of(context)
+                                    .pushReplacementNamed('/signIn');
+                              },
+                              child: Text('Cancel'),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    SizedBox(width: 16),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.red,
-                      ),
-                      onPressed: () async {
-                        try {
-                          await context.read(authProvider).deleteAccount();
-                        } on FirebaseAuthException catch (e) {
-                          print(e.toString());
-                        }
-                        await context.read(authProvider).signOut();
-                        resetFields();
-                        Navigator.of(context).pushReplacementNamed('/signIn');
-                      },
-                      child: Text('Cancel'),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

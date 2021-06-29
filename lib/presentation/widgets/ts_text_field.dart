@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:throw_smart/constants/colors.dart';
 
 class TSTextField extends StatelessWidget {
   final EdgeInsetsGeometry padding;
@@ -13,7 +14,7 @@ class TSTextField extends StatelessWidget {
 
   const TSTextField(
       {required this.padding,
-      required this.height,
+      this.height = 60,
       required this.width,
       required this.hintText,
       required this.textCapitalization,
@@ -27,11 +28,31 @@ class TSTextField extends StatelessWidget {
     return Padding(
       padding: padding,
       child: SizedBox(
-        height: height,
+        // height: height,
         width: width,
         child: TextField(
           decoration: InputDecoration(
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide(
+                color: tsLightBlue,
+                width: 2,
+              ),
+              gapPadding: 5,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide(
+                color: tsYellow,
+                width: 2,
+              ),
+              gapPadding: 5,
+            ),
             hintText: hintText,
+            fillColor: tsPaleBlue,
+            focusColor: tsYellow,
+            filled: true,
+            hoverColor: tsYellow,
           ),
           textCapitalization: textCapitalization,
           autocorrect: autocorrect,

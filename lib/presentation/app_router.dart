@@ -21,8 +21,9 @@ class AppRouter {
           },
         );
       case '/newUser':
-        return MaterialPageRoute(
-          builder: (_) =>
+        return PageRouteBuilder(
+          transitionDuration: Duration(seconds: 2),
+          pageBuilder: (_, __, ___) =>
               SafeArea(child: NewUserScreen(user: settings.arguments as User)),
         );
       case '/coachHome':

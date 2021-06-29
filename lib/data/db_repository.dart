@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../constants/enums.dart';
 import 'package:uuid/uuid.dart';
+
+import '../constants/enums.dart';
 
 final dbProvider = Provider<DBRepository>((ref) => DBRepository());
 

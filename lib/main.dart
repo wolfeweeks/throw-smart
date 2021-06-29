@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -16,6 +17,7 @@ final appRouterProvider = Provider<AppRouter>((ref) => AppRouter());
 class ThrowSmart extends HookWidget {
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
     final Future<FirebaseApp> _initialization = Firebase.initializeApp();
     return FutureBuilder(
       future: _initialization,
@@ -29,11 +31,7 @@ class ThrowSmart extends HookWidget {
           return MaterialApp(
             title: 'ThrowSmart',
             debugShowCheckedModeBanner: false,
-            onGenerateRoute: context
-                .read(
-                  appRouterProvider,
-                )
-                .onGenerateRoute,
+            onGenerateRoute: context.read(appRouterProvider).onGenerateRoute,
           );
         }
         return CircularProgressIndicator();

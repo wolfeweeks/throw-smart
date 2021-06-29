@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:throw_smart/constants/colors.dart';
 import 'package:throw_smart/data/db_repository.dart';
 import 'package:throw_smart/logic/general_providers.dart';
+import 'package:throw_smart/presentation/widgets/layout_visualizer.dart';
 import '../../data/auth_repository.dart';
 
 class SignInScreen extends ConsumerWidget {
@@ -29,69 +30,82 @@ class SignInScreen extends ConsumerWidget {
         ),
         child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Hero(
-                tag: 'logo',
-                child: Material(
-                  color: Colors.transparent,
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        'lib/assets/images/throw_smart_logo.png',
-                        fit: BoxFit.contain,
-                        width: context.read(widthProvider(context)) * 0.9,
+              Flexible(
+                fit: FlexFit.tight,
+                flex: 1,
+                child: Center(
+                  child: Hero(
+                    tag: 'logo',
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'lib/assets/images/throw_smart_logo.png',
+                            fit: BoxFit.contain,
+                            width: context.read(widthProvider(context)) * 0.9,
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Created by Wolfe Weeks',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.w200,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Created by Wolfe Weeks',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.w200,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-              SizedBox(
-                height: 100,
-              ),
-              GoogleAuthButton(
-                onPressed: () async {
-                  var userCredential =
-                      await context.read(authProvider).signInWithGoogle();
+              // SizedBox(
+              //   height: 100,
+              // ),
+              Flexible(
+                fit: FlexFit.tight,
+                flex: 1,
+                child: Center(
+                  child: GoogleAuthButton(
+                    onPressed: () async {
+                      var userCredential =
+                          await context.read(authProvider).signInWithGoogle();
 
-                  if (userCredential!.additionalUserInfo!.isNewUser) {
-                    Navigator.of(context).pushReplacementNamed(
-                      '/newUser',
-                      arguments: userCredential.user,
-                    );
-                  } else {
-                    var snapshot = await context
-                        .read(dbProvider)
-                        .getUserDocRef(userCredential.user!.uid)
-                        .get();
+                      if (userCredential!.additionalUserInfo!.isNewUser) {
+                        Navigator.of(context).pushReplacementNamed(
+                          '/newUser',
+                          arguments: userCredential.user,
+                        );
+                      } else {
+                        var snapshot = await context
+                            .read(dbProvider)
+                            .getUserDocRef(userCredential.user!.uid)
+                            .get();
 
-                    if (snapshot['userType'] == 'coach') {
-                      Navigator.of(context).pushReplacementNamed(
-                        '/coachHome',
-                        arguments: userCredential.user!.uid,
-                      );
-                    } else {
-                      Navigator.of(context).pushReplacementNamed(
-                        '/playerHome',
-                        arguments: userCredential.user!.uid,
-                      );
-                    }
-                  }
-                },
-                text: 'Sign in with Google',
-                style: AuthButtonStyle(
-                  padding: EdgeInsets.all(8),
-                  width: MediaQuery.of(context).size.width * 2 / 3,
+                        if (snapshot['userType'] == 'coach') {
+                          Navigator.of(context).pushReplacementNamed(
+                            '/coachHome',
+                            arguments: userCredential.user!.uid,
+                          );
+                        } else {
+                          Navigator.of(context).pushReplacementNamed(
+                            '/playerHome',
+                            arguments: userCredential.user!.uid,
+                          );
+                        }
+                      }
+                    },
+                    text: 'Sign in with Google',
+                    style: AuthButtonStyle(
+                      padding: EdgeInsets.all(8),
+                      width: MediaQuery.of(context).size.width * 2 / 3,
+                    ),
+                  ),
                 ),
               ),
             ],

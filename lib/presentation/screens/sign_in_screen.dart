@@ -1,10 +1,8 @@
 import 'package:auth_buttons/auth_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:throw_smart/presentation/widgets/layout_visualizer.dart';
 import 'package:throw_smart/presentation/widgets/logo.dart';
 import '../../data/db_repository.dart';
-import '../../logic/general_providers.dart';
 import '../widgets/background_container.dart';
 import '../../data/auth_repository.dart';
 

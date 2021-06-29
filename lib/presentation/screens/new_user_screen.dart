@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:throw_smart/constants/colors.dart';
 import 'package:throw_smart/presentation/widgets/background_container.dart';
 import 'package:throw_smart/presentation/widgets/layout_visualizer.dart';
 import 'package:throw_smart/presentation/widgets/logo.dart';
@@ -127,31 +128,42 @@ class NewUserScreen extends ConsumerWidget {
                           },
                         ),
 
-                        SizedBox(height: 16),
+                        Hideable(
+                          shouldShowWhen:
+                              watch(_firstNameProvider).state.isNotEmpty &&
+                                  watch(_lastNameProvider).state.isNotEmpty,
+                          child: Column(
+                            children: [
+                              SizedBox(height: 16),
 
-                        //select userType
-                        Text('Register as:'),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            PickOne<UserType>(
-                              groupValue: watch(_userTypeProvider).state,
-                              value: UserType.player,
-                              onChanged: (value) {
-                                context.read(_userTypeProvider).state = value;
-                              },
-                              text: 'Player',
-                            ),
-                            SizedBox(width: 16),
-                            PickOne<UserType>(
-                              groupValue: watch(_userTypeProvider).state,
-                              value: UserType.coach,
-                              onChanged: (value) {
-                                context.read(_userTypeProvider).state = value;
-                              },
-                              text: 'Coach',
-                            ),
-                          ],
+                              //select userType
+                              Text('Register as:'),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  PickOne<UserType>(
+                                    groupValue: watch(_userTypeProvider).state,
+                                    value: UserType.player,
+                                    onChanged: (value) {
+                                      context.read(_userTypeProvider).state =
+                                          value;
+                                    },
+                                    text: 'Player',
+                                  ),
+                                  SizedBox(width: 16),
+                                  PickOne<UserType>(
+                                    groupValue: watch(_userTypeProvider).state,
+                                    value: UserType.coach,
+                                    onChanged: (value) {
+                                      context.read(_userTypeProvider).state =
+                                          value;
+                                    },
+                                    text: 'Coach',
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
 
                         //if coach, show join or create buttons and team name/access code
@@ -505,15 +517,13 @@ class NewUserScreen extends ConsumerWidget {
                                   : null,
                               child: Text('Submit'),
                               style: ElevatedButton.styleFrom(
-                                primary: canSubmit
-                                    ? Colors.greenAccent
-                                    : Colors.grey,
+                                primary: canSubmit ? tsLightBlue : Colors.grey,
                               ),
                             ),
                             SizedBox(width: 16),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                primary: Colors.red,
+                                primary: tsRed,
                               ),
                               onPressed: () async {
                                 try {

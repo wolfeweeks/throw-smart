@@ -46,6 +46,8 @@ final _playerCanSubmitProvider = Provider<bool>((ref) {
       ref.watch(_lastNameProvider).state.isNotEmpty &&
       arsenal.state.isNotEmpty;
 });
+
+final _signUpIndexProvider = StateProvider<int>((ref) => 0);
 //** Providers used for this screen only *//////////////////////////////////////
 
 class NewUserScreen extends ConsumerWidget {
@@ -78,6 +80,8 @@ class NewUserScreen extends ConsumerWidget {
       context.read(_testArsenalProvider).state = List.filled(8, false);
 
       context.read(_arsenalProvider).state = [];
+
+      context.read(_signUpIndexProvider).state = 0;
     }
 
     return Scaffold(
@@ -96,48 +100,71 @@ class NewUserScreen extends ConsumerWidget {
                   ),
                   Flexible(
                     fit: FlexFit.tight,
-                    flex: 2,
+                    flex: 1,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        //first name text field
-                        TSTextField(
-                          padding: EdgeInsets.all(16),
-                          width: width - 32,
-                          hintText: 'First Name:',
-                          textCapitalization: TextCapitalization.words,
-                          autocorrect: false,
-                          onChanged: (value) {
-                            context.read(_firstNameProvider).state = value;
-                          },
-                          onEditingComplete: () =>
-                              FocusScope.of(context).nextFocus(),
-                          keyboardType: TextInputType.name,
-                        ),
+                        Hideable(
+                          shouldShowWhen:
+                              watch(_signUpIndexProvider).state == 0,
+                          child: Column(
+                            children: [
+                              Text(
+                                'Enter your name:',
+                                style: TextStyle(
+                                    color: tsPaleBlue,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 16),
+                              //first name text field
+                              TSTextField(
+                                padding: EdgeInsets.all(16),
+                                width: width - 32,
+                                hintText: 'First Name:',
+                                textCapitalization: TextCapitalization.words,
+                                autocorrect: false,
+                                onChanged: (value) {
+                                  context.read(_firstNameProvider).state =
+                                      value;
+                                },
+                                onEditingComplete: () =>
+                                    FocusScope.of(context).nextFocus(),
+                                keyboardType: TextInputType.name,
+                              ),
 
-                        //last name text field
-                        TSTextField(
-                          padding: EdgeInsets.all(16),
-                          width: width - 32,
-                          hintText: 'Last Name:',
-                          autocorrect: false,
-                          textCapitalization: TextCapitalization.words,
-                          onChanged: (value) {
-                            context.read(_lastNameProvider).state = value;
-                          },
+                              //last name text field
+                              TSTextField(
+                                padding: EdgeInsets.all(16),
+                                width: width - 32,
+                                hintText: 'Last Name:',
+                                autocorrect: false,
+                                textCapitalization: TextCapitalization.words,
+                                onChanged: (value) {
+                                  context.read(_lastNameProvider).state = value;
+                                },
+                              ),
+                            ],
+                          ),
                         ),
 
                         Hideable(
                           shouldShowWhen:
-                              watch(_firstNameProvider).state.isNotEmpty &&
-                                  watch(_lastNameProvider).state.isNotEmpty,
+                              watch(_signUpIndexProvider).state == 1,
                           child: Column(
                             children: [
-                              SizedBox(height: 16),
+                              // SizedBox(height: 16),
 
                               //select userType
-                              Text('Register as:'),
+                              Text(
+                                'Register as:',
+                                style: TextStyle(
+                                    color: tsPaleBlue,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 16),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -449,78 +476,109 @@ class NewUserScreen extends ConsumerWidget {
                         ),
 
                         //buttons
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            ElevatedButton(
-                              onPressed: canSubmit
-                                  ? () {
-                                      //sort arsenal by enum order
-                                      context.read(_arsenalProvider).state.sort(
-                                          (a, b) => a.index.compareTo(b.index));
-                                      context.read(dbProvider).createUser(
-                                            uid: user.uid,
-                                            firstName: context
-                                                .read(_firstNameProvider)
-                                                .state,
-                                            lastName: context
-                                                .read(_lastNameProvider)
-                                                .state,
-                                            userType: context
-                                                .read(_userTypeProvider)
-                                                .state!,
-                                            arsenal: context
-                                                .read(_arsenalProvider)
-                                                .state,
-                                            isCreatingTeam: context
-                                                        .read(
-                                                            _createOrJoinProvider)
-                                                        .state ==
-                                                    0
-                                                ? true
-                                                : false,
-                                            isJoiningTeam: context
-                                                    .read(
-                                                        _teamAccessCodeProvider)
-                                                    .state
-                                                    .isNotEmpty
-                                                ? true
-                                                : false,
-                                            // isJoiningTeam: context
-                                            //             .read(_createOrJoinProvider)
-                                            //             .state ==
-                                            //         1
-                                            //     ? true
-                                            //     : false,
-                                            teamAccessCode: context
-                                                .read(_teamAccessCodeProvider)
-                                                .state,
-                                            teamName: context
-                                                .read(_teamNameProvider)
-                                                .state,
-                                          );
-                                      var tempUserType =
-                                          context.read(_userTypeProvider).state;
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    context.read(_signUpIndexProvider).state =
+                                        context
+                                                .read(_signUpIndexProvider)
+                                                .state -
+                                            1;
+                                  },
+                                  child: Text('Back'),
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.grey[700],
+                                  ),
+                                ),
+                                SizedBox(width: 16),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    context.read(_signUpIndexProvider).state =
+                                        context
+                                                .read(_signUpIndexProvider)
+                                                .state +
+                                            1;
+                                  },
+                                  child: Text('Continue'),
+                                  style: ElevatedButton.styleFrom(
+                                    primary: tsLightBlue,
+                                  ),
+                                ),
+                                // ElevatedButton(
+                                //   onPressed: canSubmit
+                                //       ? () {
+                                //           //sort arsenal by enum order
+                                //           context.read(_arsenalProvider).state.sort(
+                                //               (a, b) => a.index.compareTo(b.index));
+                                //           context.read(dbProvider).createUser(
+                                //                 uid: user.uid,
+                                //                 firstName: context
+                                //                     .read(_firstNameProvider)
+                                //                     .state,
+                                //                 lastName: context
+                                //                     .read(_lastNameProvider)
+                                //                     .state,
+                                //                 userType: context
+                                //                     .read(_userTypeProvider)
+                                //                     .state!,
+                                //                 arsenal: context
+                                //                     .read(_arsenalProvider)
+                                //                     .state,
+                                //                 isCreatingTeam: context
+                                //                             .read(
+                                //                                 _createOrJoinProvider)
+                                //                             .state ==
+                                //                         0
+                                //                     ? true
+                                //                     : false,
+                                //                 isJoiningTeam: context
+                                //                         .read(
+                                //                             _teamAccessCodeProvider)
+                                //                         .state
+                                //                         .isNotEmpty
+                                //                     ? true
+                                //                     : false,
+                                //                 // isJoiningTeam: context
+                                //                 //             .read(_createOrJoinProvider)
+                                //                 //             .state ==
+                                //                 //         1
+                                //                 //     ? true
+                                //                 //     : false,
+                                //                 teamAccessCode: context
+                                //                     .read(_teamAccessCodeProvider)
+                                //                     .state,
+                                //                 teamName: context
+                                //                     .read(_teamNameProvider)
+                                //                     .state,
+                                //               );
+                                //           var tempUserType =
+                                //               context.read(_userTypeProvider).state;
 
-                                      resetFields();
+                                //           resetFields();
 
-                                      tempUserType == UserType.coach
-                                          ? Navigator.of(context)
-                                              .pushReplacementNamed(
-                                                  '/coachHome',
-                                                  arguments: user.uid)
-                                          : Navigator.of(context)
-                                              .pushReplacementNamed(
-                                                  '/playerHome',
-                                                  arguments: user.uid);
-                                    }
-                                  : null,
-                              child: Text('Submit'),
-                              style: ElevatedButton.styleFrom(
-                                primary: canSubmit ? tsLightBlue : Colors.grey,
-                              ),
+                                //           tempUserType == UserType.coach
+                                //               ? Navigator.of(context)
+                                //                   .pushReplacementNamed(
+                                //                       '/coachHome',
+                                //                       arguments: user.uid)
+                                //               : Navigator.of(context)
+                                //                   .pushReplacementNamed(
+                                //                       '/playerHome',
+                                //                       arguments: user.uid);
+                                //         }
+                                //       : null,
+                                //   child: Text('Submit'),
+                                //   style: ElevatedButton.styleFrom(
+                                //     primary: canSubmit ? tsLightBlue : Colors.grey,
+                                //   ),
+                                // ),
+                              ],
                             ),
-                            SizedBox(width: 16),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 primary: tsRed,

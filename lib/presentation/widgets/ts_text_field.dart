@@ -8,6 +8,7 @@ class TSTextField extends StatelessWidget {
   final String hintText;
   final TextCapitalization textCapitalization;
   final bool autocorrect;
+  final TextEditingController? controller;
   final void Function(String)? onChanged;
   final void Function()? onEditingComplete;
   final TextInputType? keyboardType;
@@ -19,6 +20,7 @@ class TSTextField extends StatelessWidget {
       required this.hintText,
       required this.textCapitalization,
       required this.autocorrect,
+      this.controller,
       this.onChanged,
       this.onEditingComplete,
       this.keyboardType});
@@ -31,6 +33,7 @@ class TSTextField extends StatelessWidget {
         // height: height,
         width: width,
         child: TextField(
+          controller: controller,
           decoration: InputDecoration(
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),

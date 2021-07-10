@@ -20,20 +20,6 @@ class PickOne<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return Row(
-    //   mainAxisAlignment: MainAxisAlignment.center,
-    //   mainAxisSize: MainAxisSize.min,
-    //   children: [
-    //     Radio<T>(
-    //       groupValue: groupValue,
-    //       value: value,
-    //       onChanged: onChanged,
-    //     ),
-    //     Text(text),
-    //   ],
-    // );
-    //TODO make custom pickone
-
     return GestureDetector(
       onTap: () {
         onChanged(this.value);
@@ -51,10 +37,11 @@ class PickOne<T> extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
         ),
         child: FittedBox(
+          fit: BoxFit.scaleDown,
           child: Text(
             text,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 40,
               color: groupValue == value ? Colors.black : tsYellow,
               fontWeight: FontWeight.bold,
             ),

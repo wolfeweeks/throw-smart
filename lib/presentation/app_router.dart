@@ -11,30 +11,30 @@ class AppRouter {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(
-          builder: (_) => SafeArea(child: SplashScreen()),
+          builder: (_) => SplashScreen(),
         );
       case '/signIn':
         return PageRouteBuilder(
-          transitionDuration: Duration(seconds: 1),
+          transitionDuration: Duration(seconds: 1, milliseconds: 500),
           pageBuilder: (_, __, ___) {
-            return SafeArea(child: SignInScreen());
+            return SignInScreen();
           },
         );
       case '/newUser':
         return PageRouteBuilder(
-          transitionDuration: Duration(seconds: 2),
+          transitionDuration: Duration(seconds: 1, milliseconds: 500),
           pageBuilder: (_, __, ___) =>
-              SafeArea(child: NewUserScreen(user: settings.arguments as User)),
+              NewUserScreen(user: settings.arguments as User),
         );
       case '/coachHome':
         return MaterialPageRoute(builder: (context) {
           String uid = settings.arguments as String;
-          return SafeArea(child: CoachHomeScreen(uid));
+          return CoachHomeScreen(uid);
         });
       case '/playerHome':
         return MaterialPageRoute(builder: (context) {
           String uid = settings.arguments as String;
-          return SafeArea(child: PlayerHomeScreen(uid));
+          return PlayerHomeScreen(uid);
         });
     }
   }

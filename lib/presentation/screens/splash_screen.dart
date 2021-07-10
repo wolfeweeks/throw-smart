@@ -43,12 +43,14 @@ class SplashScreen extends ConsumerWidget {
 
     return Scaffold(
       body: BackgroundContainer(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Logo.withCreatedBy(),
-            ],
+        child: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Logo.withCreatedBy(),
+              ],
+            ),
           ),
         ),
       ),

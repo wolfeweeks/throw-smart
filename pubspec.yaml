@@ -30,6 +30,7 @@ dependencies:
   firebase_core: ^1.3.0
   flutter_hooks: ^0.17.0
   flutter_riverpod: ^0.14.0+3
+  font_awesome_flutter: ^9.1.0
   google_sign_in: ^5.0.4
   hooks_riverpod: ^0.14.0+4
   uuid: ^3.0.4

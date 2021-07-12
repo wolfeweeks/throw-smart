@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:throw_smart/constants/colors.dart';
-import 'package:throw_smart/presentation/widgets/layout_visualizer.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../../constants/colors.dart';
+import 'hideable.dart';
 
 class PickMany<T> extends StatelessWidget {
-  final bool value;
+  final bool isSelected;
   final ValueSetter<bool?> onChanged;
   final double? width;
   final double height;
@@ -12,12 +13,12 @@ class PickMany<T> extends StatelessWidget {
   final Color textColor;
 
   const PickMany({
-    required this.value,
+    required this.isSelected,
     required this.onChanged,
     required this.width,
     this.height = 60,
     required this.text,
-    this.color = tsLightBlue,
+    this.color = Colors.transparent,
     this.textColor = Colors.black,
   });
 
@@ -27,32 +28,17 @@ class PickMany<T> extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: GestureDetector(
         onTap: () {
-          onChanged(this.value);
+          onChanged(this.isSelected);
         },
         child: Container(
-          width: width ?? null,
-          height: height,
           decoration: BoxDecoration(
-            color: value ? color : tsPaleBlue,
-            borderRadius: BorderRadius.circular(999),
+            color: isSelected ? tsYellow : Colors.black.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Container(
             padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(999),
-              gradient: LinearGradient(
-                colors: [
-                  value
-                      ? Color.lerp(color, Colors.black, 0.4)!
-                      : Color.lerp(tsPaleBlue, Colors.white, 0.25)!,
-                  value
-                      ? Color.lerp(color, Colors.white, 0.25)!
-                      : Color.lerp(tsPaleBlue, Colors.black, 0.4)!,
-                ],
-                begin: Alignment(0, -1),
-                end: Alignment(0, 1),
-              ),
-            ),
+            width: width ?? null,
+            height: height,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.min,
@@ -61,9 +47,18 @@ class PickMany<T> extends StatelessWidget {
                   child: Text(
                     text,
                     style: TextStyle(
-                      color: value ? tsPaleBlue : Colors.black,
+                      color: isSelected ? tsDarkBlue : textColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
+                    ),
+                  ),
+                ),
+                Hideable(
+                  shouldShowWhen: isSelected,
+                  child: FittedBox(
+                    child: Icon(
+                      FontAwesomeIcons.check,
+                      color: isSelected ? tsDarkBlue : textColor,
                     ),
                   ),
                 ),

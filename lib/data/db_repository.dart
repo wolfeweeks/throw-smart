@@ -11,7 +11,7 @@ class DBRepository {
   final uuid = Uuid();
 
   //** Create */
-  void createUser({
+  Future<void> createUser({
     required String uid,
     required String firstName,
     required String lastName,
@@ -21,13 +21,14 @@ class DBRepository {
     bool isCreatingTeam = false,
     String? teamAccessCode,
     String? teamName,
-  }) {
+  }) async {
     if (userType == UserType.player) {
       List<String> arsenalAsStrings = [];
       arsenal!.forEach((element) {
         arsenalAsStrings.add(element.toString());
       });
-      _db.collection('users').doc(uid).set({
+
+      await _db.collection('users').doc(uid).set({
         'firstName': firstName,
         'lastName': lastName,
         'userType': 'player',
@@ -36,7 +37,7 @@ class DBRepository {
     }
 
     if (userType == UserType.coach) {
-      _db.collection('users').doc(uid).set({
+      await _db.collection('users').doc(uid).set({
         'firstName': firstName,
         'lastName': lastName,
         'userType': 'coach',
@@ -47,7 +48,7 @@ class DBRepository {
     }
 
     if (isJoiningTeam) {
-      joinTeam(teamAccessCode!, uid, firstName, lastName, userType);
+      await joinTeam(teamAccessCode!, uid, firstName, lastName, userType);
     }
   }
 
@@ -65,6 +66,17 @@ class DBRepository {
   //** Read */
   DocumentReference getUserDocRef(String uid) {
     return _db.collection('users').doc(uid);
+  }
+
+  Future<bool> isValidAccessCode(String accessCode) async {
+    var querySnapshot = await _db
+        .collection('teams')
+        .where('accessCode', isEqualTo: accessCode)
+        .get();
+
+    if (querySnapshot.size > 0) return true;
+
+    return false;
   }
 
   //** Update */

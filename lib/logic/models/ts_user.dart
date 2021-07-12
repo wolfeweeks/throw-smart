@@ -1,3 +1,4 @@
 abstract class TSUser {
-  late final String uid, firstName, lastName;
+  late final String uid;
+  late String firstName, lastName;
 }

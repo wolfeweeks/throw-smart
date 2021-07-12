@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:throw_smart/constants/colors.dart';
+import '../../constants/colors.dart';
 
 class TSTextField extends StatelessWidget {
   final EdgeInsetsGeometry padding;

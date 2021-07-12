@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:throw_smart/logic/general_providers.dart';
-import 'package:throw_smart/presentation/widgets/hideable.dart';
-import 'package:throw_smart/presentation/widgets/layout_visualizer.dart';
+import '../../logic/general_providers.dart';
 
 class Logo extends ConsumerWidget {
   final bool showCreatedBy;

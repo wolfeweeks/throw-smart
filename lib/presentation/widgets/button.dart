@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:throw_smart/constants/colors.dart';
 
 class TSButton extends StatelessWidget {
   final void Function()? onPressed;

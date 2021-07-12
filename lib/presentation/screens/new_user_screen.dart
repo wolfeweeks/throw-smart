@@ -54,12 +54,6 @@ final _playerCanSubmitProvider = Provider<bool>((ref) {
 });
 //** Providers used for this screen only *//////////////////////////////////////
 
-//** User State Notifier Provider*/
-// final _tsUserStateNotifierProvider =
-//     StateNotifierProvider<TSUserStateNotifier, TSUser?>(
-//         (ref) => TSUserStateNotifier());
-//** User State Notifier Provider*/
-
 class NewUserScreen extends ConsumerWidget {
   final User user;
 
@@ -67,19 +61,23 @@ class NewUserScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
-    // var tsUser = watch(_tsUserStateNotifierProvider);
-
     bool canSubmit = watch(_userTypeProvider).state == UserType.coach
         ? watch(_coachCanSubmitProvider)
         : watch(_playerCanSubmitProvider);
 
-    var arsenal = watch(_arsenalProvider);
+    int signUpIndex = watch(_signUpIndexProvider).state;
+    String firstName = watch(_firstNameProvider).state;
+    String lastName = watch(_firstNameProvider).state;
+    UserType? userType = watch(_userTypeProvider).state;
+    String teamAccessCode = watch(_teamAccessCodeProvider).state;
+    String teamName = watch(_teamNameProvider).state;
+    List<PitchType> arsenal = watch(_arsenalProvider).state;
 
     double width = watch(widthProvider(context));
     double height = watch(heightProvider(context));
 
     String getTopText() {
-      switch (watch(_signUpIndexProvider).state) {
+      switch (signUpIndex) {
         case 0:
           return 'Enter your name:';
         case 1:
@@ -210,28 +208,25 @@ class NewUserScreen extends ConsumerWidget {
               .pushReplacementNamed('/playerHome', arguments: user.uid);
     }
 
-    bool lastPage = (watch(_userTypeProvider).state == UserType.coach &&
-            watch(_signUpIndexProvider).state == 2) ||
-        (watch(_signUpIndexProvider).state == 3);
-
     bool canContinue() {
-      switch (watch(_signUpIndexProvider).state) {
+      switch (signUpIndex) {
         case 0:
-          return watch(_firstNameProvider).state.isNotEmpty &&
-              watch(_lastNameProvider).state.isNotEmpty;
+          return firstName.isNotEmpty && lastName.isNotEmpty;
         case 1:
-          return watch(_userTypeProvider).state != null;
+          return userType != null;
         case 2:
           if (context.read(_userTypeProvider).state == UserType.coach) {
-            return watch(_teamAccessCodeProvider).state.isNotEmpty ||
-                watch(_teamNameProvider).state.isNotEmpty;
+            return teamAccessCode.isNotEmpty || teamName.isNotEmpty;
           } else {
-            return watch(_arsenalProvider).state.isNotEmpty;
+            return arsenal.isNotEmpty;
           }
         default:
           return false;
       }
     }
+
+    bool lastPage =
+        (userType == UserType.coach && signUpIndex == 2) || (signUpIndex == 3);
 
     return Scaffold(
       body: BackgroundContainer(
@@ -282,49 +277,34 @@ class NewUserScreen extends ConsumerWidget {
 
                                     //name fields
                                     Hideable(
-                                      shouldShowWhen:
-                                          watch(_signUpIndexProvider).state ==
-                                              0,
+                                      shouldShowWhen: signUpIndex == 0,
                                       child: NameFields(width: width),
                                     ),
 
                                     //user type pick ones
                                     Hideable(
-                                      shouldShowWhen:
-                                          watch(_signUpIndexProvider).state ==
-                                              1,
+                                      shouldShowWhen: signUpIndex == 1,
                                       child: UserTypePickOnes(width: width),
                                     ),
 
                                     //join or create team pick ones and field
                                     Hideable(
-                                      shouldShowWhen:
-                                          watch(_signUpIndexProvider).state ==
-                                                  2 &&
-                                              watch(_userTypeProvider).state ==
-                                                  UserType.coach,
+                                      shouldShowWhen: signUpIndex == 2 &&
+                                          userType == UserType.coach,
                                       child: JoinOrCreate(width: width),
                                     ),
 
                                     //arsenal selector
                                     Hideable(
-                                      shouldShowWhen:
-                                          watch(_signUpIndexProvider).state ==
-                                                  2 &&
-                                              watch(_userTypeProvider).state ==
-                                                  UserType.player,
-                                      child: ArsenalList(
-                                        arsenal: arsenal,
-                                      ),
+                                      shouldShowWhen: signUpIndex == 2 &&
+                                          userType == UserType.player,
+                                      child: ArsenalList(),
                                     ),
 
                                     //join team (for players)
                                     Hideable(
-                                      shouldShowWhen:
-                                          watch(_signUpIndexProvider).state ==
-                                                  3 &&
-                                              watch(_userTypeProvider).state ==
-                                                  UserType.player,
+                                      shouldShowWhen: signUpIndex == 3 &&
+                                          userType == UserType.player,
                                       child: TSTextField(
                                         padding: EdgeInsets.only(top: 16),
                                         width: width,
@@ -447,13 +427,15 @@ class NewUserScreen extends ConsumerWidget {
 class ArsenalList extends ConsumerWidget {
   const ArsenalList({
     Key? key,
-    required this.arsenal,
   }) : super(key: key);
-
-  final StateController<List<PitchType>> arsenal;
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
+    ScrollController arsenalListScrollController =
+        watch(_arsenalListScrollControllerProvider);
+
+    var arsenal = watch(_arsenalProvider);
+
     return Expanded(
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 8),
@@ -473,7 +455,7 @@ class ArsenalList extends ConsumerWidget {
                 isAlwaysShown: true,
                 interactive: true,
                 radius: Radius.circular(999),
-                controller: watch(_arsenalListScrollControllerProvider),
+                controller: arsenalListScrollController,
                 thickness: 10,
                 child: NotificationListener<OverscrollIndicatorNotification>(
                   onNotification: (overscroll) {
@@ -481,14 +463,12 @@ class ArsenalList extends ConsumerWidget {
                     return false;
                   },
                   child: ListView(
-                    controller: watch(_arsenalListScrollControllerProvider),
+                    controller: arsenalListScrollController,
                     padding: EdgeInsets.only(right: 21),
                     children: [
                       //fourseam
                       PickMany<PitchType>(
-                        isSelected: watch(_arsenalProvider)
-                            .state
-                            .contains(PitchType.fourSeam),
+                        isSelected: arsenal.state.contains(PitchType.fourSeam),
                         onChanged: (value) {
                           if (!value!) {
                             arsenal.state.add(PitchType.fourSeam);
@@ -504,9 +484,7 @@ class ArsenalList extends ConsumerWidget {
 
                       //twoseam
                       PickMany<PitchType>(
-                        isSelected: watch(_arsenalProvider)
-                            .state
-                            .contains(PitchType.twoSeam),
+                        isSelected: arsenal.state.contains(PitchType.twoSeam),
                         onChanged: (value) {
                           if (!value!) {
                             arsenal.state.add(PitchType.twoSeam);
@@ -521,9 +499,7 @@ class ArsenalList extends ConsumerWidget {
 
                       //cutter
                       PickMany<PitchType>(
-                        isSelected: watch(_arsenalProvider)
-                            .state
-                            .contains(PitchType.cutter),
+                        isSelected: arsenal.state.contains(PitchType.cutter),
                         onChanged: (value) {
                           if (!value!) {
                             arsenal.state.add(PitchType.cutter);
@@ -538,9 +514,7 @@ class ArsenalList extends ConsumerWidget {
 
                       //curve
                       PickMany<PitchType>(
-                        isSelected: watch(_arsenalProvider)
-                            .state
-                            .contains(PitchType.curve),
+                        isSelected: arsenal.state.contains(PitchType.curve),
                         onChanged: (value) {
                           if (!value!) {
                             arsenal.state.add(PitchType.curve);
@@ -555,9 +529,7 @@ class ArsenalList extends ConsumerWidget {
 
                       //slider
                       PickMany<PitchType>(
-                        isSelected: watch(_arsenalProvider)
-                            .state
-                            .contains(PitchType.slider),
+                        isSelected: arsenal.state.contains(PitchType.slider),
                         onChanged: (value) {
                           if (!value!) {
                             arsenal.state.add(PitchType.slider);
@@ -572,9 +544,7 @@ class ArsenalList extends ConsumerWidget {
 
                       //change
                       PickMany<PitchType>(
-                        isSelected: watch(_arsenalProvider)
-                            .state
-                            .contains(PitchType.changeup),
+                        isSelected: arsenal.state.contains(PitchType.changeup),
                         onChanged: (value) {
                           if (!value!) {
                             arsenal.state.add(PitchType.changeup);
@@ -589,9 +559,7 @@ class ArsenalList extends ConsumerWidget {
 
                       //splitter
                       PickMany<PitchType>(
-                        isSelected: watch(_arsenalProvider)
-                            .state
-                            .contains(PitchType.splitter),
+                        isSelected: arsenal.state.contains(PitchType.splitter),
                         onChanged: (value) {
                           if (!value!) {
                             arsenal.state.add(PitchType.splitter);
@@ -606,9 +574,8 @@ class ArsenalList extends ConsumerWidget {
 
                       //knuckle
                       PickMany<PitchType>(
-                        isSelected: watch(_arsenalProvider)
-                            .state
-                            .contains(PitchType.knuckleball),
+                        isSelected:
+                            arsenal.state.contains(PitchType.knuckleball),
                         onChanged: (value) {
                           if (!value!) {
                             arsenal.state.add(PitchType.knuckleball);
@@ -642,6 +609,8 @@ class JoinOrCreate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
+    int? createOrJoin = watch(_createOrJoinProvider).state;
+
     return Column(
       children: [
         //if coach, show join or create buttons and team name/access code
@@ -650,7 +619,7 @@ class JoinOrCreate extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             PickOne<int>(
-              groupValue: watch(_createOrJoinProvider).state,
+              groupValue: createOrJoin,
               value: 0,
               onChanged: (value) {
                 context.read(_createOrJoinProvider).state = value;
@@ -660,7 +629,7 @@ class JoinOrCreate extends ConsumerWidget {
             ),
             SizedBox(width: 16),
             PickOne<int>(
-              groupValue: watch(_createOrJoinProvider).state,
+              groupValue: createOrJoin,
               value: 1,
               onChanged: (value) {
                 context.read(_createOrJoinProvider).state = value;
@@ -675,15 +644,13 @@ class JoinOrCreate extends ConsumerWidget {
         TSTextField(
           padding: EdgeInsets.only(top: 16),
           width: width,
-          hintText: watch(_createOrJoinProvider).state == 0
-              ? 'Team Name:'
-              : 'Team Access Code:',
+          hintText: createOrJoin == 0 ? 'Team Name:' : 'Team Access Code:',
           autocorrect: false,
-          textCapitalization: watch(_createOrJoinProvider).state == 0
+          textCapitalization: createOrJoin == 0
               ? TextCapitalization.words
               : TextCapitalization.none,
           onChanged: (value) {
-            watch(_createOrJoinProvider).state == 0
+            createOrJoin == 0
                 ? context.read(_teamNameProvider).state = value
                 : context.read(_teamAccessCodeProvider).state = value;
           },
@@ -703,11 +670,13 @@ class UserTypePickOnes extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
+    UserType? userType = watch(_userTypeProvider).state;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PickOne<UserType>(
-          groupValue: watch(_userTypeProvider).state,
+          groupValue: userType,
           value: UserType.player,
           onChanged: (value) {
             context.read(_userTypeProvider).state = value;
@@ -716,7 +685,7 @@ class UserTypePickOnes extends ConsumerWidget {
         ),
         SizedBox(height: 16),
         PickOne<UserType>(
-          groupValue: watch(_userTypeProvider).state,
+          groupValue: userType,
           value: UserType.coach,
           onChanged: (value) {
             context.read(_userTypeProvider).state = value;
@@ -738,11 +707,16 @@ class NameFields extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
+    TextEditingController firstNameController =
+        watch(_firstNameControllerProvider);
+    TextEditingController lastNameController =
+        watch(_lastNameControllerProvider);
+
     return Column(
       children: [
         //first name text field
         TSTextField(
-          controller: watch(_firstNameControllerProvider),
+          controller: firstNameController,
           padding: EdgeInsets.symmetric(vertical: 16),
           width: width,
           hintText: 'First Name:',
@@ -757,7 +731,7 @@ class NameFields extends ConsumerWidget {
 
         //last name text field
         TSTextField(
-          controller: watch(_lastNameControllerProvider),
+          controller: lastNameController,
           padding: EdgeInsets.symmetric(vertical: 16),
           width: width,
           hintText: 'Last Name:',
